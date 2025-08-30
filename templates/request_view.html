@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Request Details</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background:#f6f8fb; }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 { text-align:center; margin-bottom: 20px; }
+        .details {
+            background:#f1f6fb;
+            border:1px solid #ddd;
+            padding:15px;
+            margin-bottom:20px;
+            border-radius:6px;
+        }
+        .details p { margin:6px 0; }
+        .letter-box {
+            width: 100%;
+            min-height: 500px; /* readable area */
+            border: 1px solid #ddd;
+            padding: 20px;
+            background: #fafafa;
+            white-space: pre-wrap;
+            font-size: 15px;
+            line-height: 1.6;
+            border-radius: 6px;
+            margin-bottom:20px;
+        }
+        .actions { text-align:center; margin-top:20px; }
+        .btn {
+            display:inline-block;
+            padding:10px 18px;
+            margin:5px;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+            font-size:15px;
+            text-decoration:none;
+            color:#fff;
+        }
+        .approve { background: green; }
+        .reject { background: red; }
+        .back { background:#007BFF; }
+        .pdf { background:#6c2ed9; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>📄 Request: {{ req.title }}</h2>
+    <div class="details">
+        <p><b>Submitted By:</b> {{ req.creator.username }}</p>
+        <p><b>Status:</b> {{ req.status }}</p>
+        <p><b>Submitted On:</b> {{ req.created_at.strftime('%d-%m-%Y %I:%M %p') }}</p>
+    </div>
+
+    <h3>Letter Content:</h3>
+    <div class="letter-box">{{ req.description }}</div>
+
+    <div class="actions">
+        <!-- Approve / Reject buttons based on role & status -->
+        {% if current_user.role == "class_teacher" and req.class_teacher_status == "Pending" %}
+            <form action="{{ url_for('approve_request', req_id=req.id, role='class_teacher') }}" method="post" style="display:inline;">
+                <button type="submit" class="btn approve">✅ Approve</button>
+            </form>
+            <form action="{{ url_for('reject_request', req_id=req.id, role='class_teacher') }}" method="post" style="display:inline;">
+                <button type="submit" class="btn reject">❌ Reject</button>
+            </form>
+        {% elif current_user.role == "hod" and req.class_teacher_status == "Approved" and req.hod_status == "Pending" %}
+            <form action="{{ url_for('approve_request', req_id=req.id, role='hod') }}" method="post" style="display:inline;">
+                <button type="submit" class="btn approve">✅ Approve</button>
+            </form>
+            <form action="{{ url_for('reject_request', req_id=req.id, role='hod') }}" method="post" style="display:inline;">
+                <button type="submit" class="btn reject">❌ Reject</button>
+            </form>
+        {% elif current_user.role == "principal" and req.hod_status == "Approved" and req.principal_status == "Pending" %}
+            <form action="{{ url_for('approve_request', req_id=req.id, role='principal') }}" method="post" style="display:inline;">
+                <button type="submit" class="btn approve">✅ Approve</button>
+            </form>
+            <form action="{{ url_for('reject_request', req_id=req.id, role='principal') }}" method="post" style="display:inline;">
+                <button type="submit" class="btn reject">❌ Reject</button>
+            </form>
+        {% endif %}
+
+        <!-- PDF download (only after Principal approves) -->
+        {% if req.principal_status == "Approved" %}
+            <a href="{{ url_for('generate_pdf', req_id=req.id) }}" class="btn pdf">📥 Download PDF</a>
+        {% endif %}
+
+        <a href="{{ url_for('dashboard') }}" class="btn back">⬅ Back to Dashboard</a>
+    </div>
+</div>
+</body>
+</html>

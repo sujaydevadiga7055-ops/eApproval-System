@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background:#f6f8fb; color:#222; }
+        h2 { margin-bottom: 10px; }
+        .top-links { margin-bottom: 18px; }
+        .top-links a { margin-right: 12px; text-decoration:none; color:#007bff; }
+        table { width:100%; border-collapse: collapse; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
+        th, td { padding:12px; border:1px solid #e8edf3; text-align:center; }
+        th { background:#f1f6fb; }
+        .status { font-weight:bold; padding:4px 8px; border-radius:4px; display:inline-block; }
+        .Approved { color:#1b7a3a; }
+        .Rejected { color:#c92a2a; }
+        .Pending { color:#b36a00; }
+        .action-buttons form { display:inline-block; margin:2px; }
+        .btn { padding:6px 10px; border:none; border-radius:4px; cursor:pointer; color:#fff; font-size:14px; }
+        .btn-approve { background:#28a745; }
+        .btn-reject { background:#dc3545; }
+        .btn-pdf { background:#007bff; text-decoration:none; }
+        .btn-view { background:#6c757d; text-decoration:none; }
+    </style>
+</head>
+<body>
+    <h2>Welcome, {{ current_user.username }} ({{ current_user.role.replace('_',' ').title() }})</h2>
+
+    <div class="top-links">
+        {% if current_user.role == 'student' %}
+            <a href="{{ url_for('new_request') }}">➕ Create New Request</a>
+        {% endif %}
+        <a href="{{ url_for('logout') }}">🚪 Logout</a>
+    </div>
+
+    <h3>Requests</h3>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Created By</th>
+            <th>Class Teacher</th>
+            <th>HOD</th>
+            <th>Principal</th>
+            <th>Actions</th>
+        </tr>
+
+        {% for req in requests %}
+        <tr>
+            <td>{{ req.id }}</td>
+            <td style="text-align:left">{{ req.title }}</td>
+            <td>{{ req.creator.username }}</td>
+
+            <td><span class="status {{ req.class_teacher_status }}">{{ req.class_teacher_status }}</span></td>
+            <td><span class="status {{ req.hod_status }}">{{ req.hod_status }}</span></td>
+            <td><span class="status {{ req.principal_status }}">{{ req.principal_status }}</span></td>
+
+            <td class="action-buttons">
+                <!-- Always show View -->
+                <a class="btn btn-view" href="{{ url_for('view_request', req_id=req.id) }}">👁 View</a>
+
+                <!-- Approval buttons -->
+                {% if current_user.role == 'class_teacher' and req.class_teacher_status == 'Pending' %}
+                    <form action="{{ url_for('approve_request', req_id=req.id, role='class_teacher') }}" method="post">
+                        <button class="btn btn-approve" type="submit">Approve</button>
+                    </form>
+                    <form action="{{ url_for('reject_request', req_id=req.id, role='class_teacher') }}" method="post">
+                        <button class="btn btn-reject" type="submit">Reject</button>
+                    </form>
+                {% elif current_user.role == 'hod' and req.class_teacher_status == 'Approved' and req.hod_status == 'Pending' %}
+                    <form action="{{ url_for('approve_request', req_id=req.id, role='hod') }}" method="post">
+                        <button class="btn btn-approve" type="submit">Approve</button>
+                    </form>
+                    <form action="{{ url_for('reject_request', req_id=req.id, role='hod') }}" method="post">
+                        <button class="btn btn-reject" type="submit">Reject</button>
+                    </form>
+                {% elif current_user.role == 'principal' and req.hod_status == 'Approved' and req.principal_status == 'Pending' %}
+                    <form action="{{ url_for('approve_request', req_id=req.id, role='principal') }}" method="post">
+                        <button class="btn btn-approve" type="submit">Approve</button>
+                    </form>
+                    <form action="{{ url_for('reject_request', req_id=req.id, role='principal') }}" method="post">
+                        <button class="btn btn-reject" type="submit">Reject</button>
+                    </form>
+                {% endif %}
+
+                <!-- PDF download -->
+                {% if req.principal_status == 'Approved' %}
+                    <a class="btn btn-pdf" href="{{ url_for('generate_pdf', req_id=req.id) }}">📄 PDF</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
