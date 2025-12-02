@@ -1,25 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>College E-Approval</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Use a block for a dynamic title, default to 'eApproval' -->
+    <title>{% block title %}eApproval System{% endblock %}</title>
+    <!-- Link our one, powerful stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <nav>
-        <a href="{{ url_for('dashboard') }}">Dashboard</a> |
-        <a href="{{ url_for('new_request') }}">New Request</a> |
-        <a href="{{ url_for('logout') }}">Logout</a>
-    </nav>
-    <hr>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul>
-        {% for msg in messages %}
-          <li>{{ msg }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
+
+    <!--
+    This 'if' check ensures the header only appears *after* login.
+    The login page itself will not have the header.
+    -->
+    {% if current_user.is_authenticated %}
+    <header class="header">
+        <a href="{{ url_for('dashboard') }}" class="logo">eApproval</a>
+        <nav class="nav">
+            <!-- Common links for all logged-in users -->
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            
+            <!-- Conditional "New Request" button for students -->
+            {% if current_user.role == 'student' %}
+                <a href="{{ url_for('new_request') }}" class="btn-nav-new">➕ New Request</a>
+            {% endif %}
+            
+            <!-- Logout Button -->
+            <a href="{{ url_for('logout') }}" class="btn-nav-logout">Logout</a>
+        </nav>
+    </header>
+    {% endif %}
+
+    <!-- Flash messages container -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flash-messages">
+            {% for category, message in messages %}
+                <!-- Use category for 'error' or 'success' class -->
+                <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
     {% endwith %}
-    {% block content %}{% endblock %}
+
+    <!--
+    This is the main content block.
+    All other pages (login, dashboard) will inject their
+    content right here.
+    -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
 </body>
 </html>

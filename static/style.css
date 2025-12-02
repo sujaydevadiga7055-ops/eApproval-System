@@ -1,0 +1,290 @@
+/* === Global Resets & Body === */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f8f9fa; /* Light gray background */
+    color: #212529;
+    line-height: 1.6;
+}
+
+/* === Main Layout Containers === */
+.container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.login-container {
+    max-width: 420px;
+    margin: 10vh auto;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+/* === Header / Navigation === */
+.header {
+    background: #ffffff;
+    padding: 15px 30px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header .logo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.header .nav a {
+    margin-left: 15px;
+    text-decoration: none;
+    color: #495057;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+.header .nav a:hover {
+    background-color: #f1f3f5;
+}
+
+.header .nav .btn-nav-logout {
+    color: #fff;
+    background: #dc3545;
+}
+.header .nav .btn-nav-logout:hover {
+    background: #c82333;
+}
+.header .nav .btn-nav-new {
+    color: #fff;
+    background: #28a745;
+}
+.header .nav .btn-nav-new:hover {
+    background: #218838;
+}
+
+
+/* === Forms (Login & New Request) === */
+h2 {
+    margin-bottom: 25px;
+    text-align: center;
+    color: #343a40;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #495057;
+}
+
+input[type="text"],
+input[type="password"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.2);
+}
+
+textarea {
+    min-height: 350px; /* More reasonable height */
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.6;
+}
+
+/* === Buttons (Unified) === */
+.btn {
+    display: inline-block;
+    padding: 11px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
+    text-align: center;
+    margin: 5px 3px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.btn:hover {
+    transform: translateY(-1px);
+}
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-full {
+    width: 100%;
+}
+
+.btn-primary { background: #007bff; }
+.btn-primary:hover { background: #0056b3; }
+
+.btn-success { background: #28a745; }
+.btn-success:hover { background: #218838; }
+
+.btn-danger { background: #dc3545; }
+.btn-danger:hover { background: #c82333; }
+
+.btn-secondary { background: #6c757d; }
+.btn-secondary:hover { background: #5a6268; }
+
+.btn-pdf { background: #6f42c1; } /* Purple for PDF */
+.btn-pdf:hover { background: #5a32a3; }
+
+.back-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+.back-link:hover { text-decoration: underline; }
+
+/* === Dashboard Table === */
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.dashboard-table th, 
+.dashboard-table td {
+    padding: 14px;
+    border-bottom: 1px solid #e8edf3;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.dashboard-table th {
+    background: #f1f6fb;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.dashboard-table .action-buttons form {
+    display: inline-block;
+    margin: 0;
+}
+
+.dashboard-table .action-buttons .btn {
+    padding: 6px 10px;
+    font-size: 14px;
+}
+
+/* === Status Pills === */
+.status {
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    text-transform: uppercase;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+.status.Approved { color: #155724; background: #d4edda; border: 1px solid #c3e6cb; }
+.status.Rejected { color: #721c24; background: #f8d7da; border: 1px solid #f5c6cb; }
+.status.Pending { color: #856404; background: #fff3cd; border: 1px solid #ffeeba; }
+
+/* === Flash Messages (Alerts) === */
+.flash-messages {
+    list-style: none;
+    margin: 0 auto 20px auto;
+    max-width: 1000px;
+    padding: 0;
+}
+.flash-messages li, .flash-message {
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+.flash-message.error, .flash-messages li.error {
+    color: #721c24;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+.flash-message.success, .flash-messages li.success {
+    color: #155724;
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+/* === Request View Page === */
+.request-details {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+}
+.request-details p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+.request-details p b {
+    color: #495057;
+    width: 120px;
+    display: inline-block;
+}
+
+.letter-box {
+    width: 100%;
+    min-height: 400px; /* readable area */
+    border: 1px solid #ddd;
+    padding: 25px;
+    background: #fafafa;
+    white-space: pre-wrap;
+    font-size: 16px;
+    line-height: 1.7;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-family: 'Georgia', 'Times New Roman', Times, serif;
+}
+
+.request-actions {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid #e9ecef;
+}
+.request-actions form {
+    display: inline-block;
+}
