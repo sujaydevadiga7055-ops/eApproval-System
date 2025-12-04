@@ -1,82 +1,272 @@
-<!-- This page now *extends* base.html -->
-{% extends "base.html" %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>eApproval — Dashboard</title>
 
-{% block title %}Dashboard - eApproval{% endblock %}
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
-{% block content %}
-<div class="container">
-    <h2>Welcome, {{ current_user.username }} ({{ current_user.role.replace('_',' ').title() }})</h2>
-    
-    <!-- 
-    The 'Create New' and 'Logout' links are now in the header 
-    from base.html, so we can remove the old .top-links div.
-    -->
+  <style>
+    :root{
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --muted: #6b7280;
+      --text: #0b1722;
+      --accent-a: #5b6cff; /* bluish */
+      --accent-b: #06b6d4; /* cyan */
+      --glass: rgba(255,255,255,0.6);
+      --card-shadow: 0 12px 30px rgba(11,27,43,0.08);
+      --border: rgba(11,27,43,0.06);
+      --success: #16a34a;
+      --warn: #d97706;
+      --danger: #dc2626;
+    }
 
-    <h3>Requests</h3>
-    <table class="dashboard-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Created By</th>
-                <th>Class Teacher</th>
-                <th>HOD</th>
-                <th>Principal</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for req in requests %}
-            <tr>
-                <td>{{ req.id }}</td>
-                <td>{{ req.title }}</td>
-                <td>{{ req.creator.username }}</td>
+    [data-theme="dark"]{
+      --bg: linear-gradient(180deg,#071428 0%, #071827 100%);
+      --panel: #0b1724;
+      --muted: #9aa6b2;
+      --text: #e6eef9;
+      --accent-a: #8b5cf6;
+      --accent-b: #06b6d4;
+      --glass: rgba(255,255,255,0.03);
+      --card-shadow: 0 12px 30px rgba(2,6,23,0.55);
+      --border: rgba(255,255,255,0.04);
+      --success: #22c55e;
+      --warn: #f59e0b;
+      --danger: #fb7185;
+    }
 
-                <!-- Status pills now use the 'status' class and a dynamic class -->
-                <td><span class="status {{ req.class_teacher_status }}">{{ req.class_teacher_status }}</span></td>
-                <td><span class="status {{ req.hod_status }}">{{ req.hod_status }}</span></td>
-                <td><span class="status {{ req.principal_status }}">{{ req.principal_status }}</span></td>
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    .app{display:flex;gap:20px;min-height:100vh;padding:22px;box-sizing:border-box}
 
-                <td class="action-buttons">
-                    <!-- Always show View -->
-                    <a class="btn btn-secondary" href="{{ url_for('view_request', req_id=req.id) }}">👁 View</a>
+    /* SIDEBAR */
+    .sidebar{
+      width:260px;
+      background:linear-gradient(180deg,var(--panel), color-mix(in srgb,var(--panel) 92%, transparent));
+      border-radius:14px;
+      padding:18px;
+      box-shadow:var(--card-shadow);
+      border:1px solid var(--border);
+      display:flex;flex-direction:column;gap:14px;flex-shrink:0;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand .logo{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent-a),var(--accent-b));display:flex;align-items:center;justify-content:center;color:white;font-weight:800}
+    .brand h3{margin:0;font-size:1.05rem}
+    .muted{color:var(--muted)}
+    .nav {display:flex;flex-direction:column;gap:6px}
+    .nav a{padding:10px 12px;border-radius:10px;color:var(--muted);text-decoration:none;font-weight:600}
+    .nav a.active, .nav a:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--accent-a) 14%, transparent), color-mix(in srgb,var(--accent-b) 8%, transparent));color:var(--text)}
 
-                    <!-- Approval buttons -->
-                    {% if current_user.role == 'class_teacher' and req.class_teacher_status == 'Pending' %}
-                        <form action="{{ url_for('approve_request', req_id=req.id) }}" method="post">
-                            <button class="btn btn-success" type="submit">Approve</button>
-                        </form>
-                        <form action="{{ url_for('reject_request', req_id=req.id, role='class_teacher') }}" method="post">
-                            <button class="btn btn-danger" type="submit">Reject</button>
-                        </form>
-                    {% elif current_user.role == 'hod' and req.class_teacher_status == 'Approved' and req.hod_status == 'Pending' %}
-                        <form action="{{ url_for('approve_request', req_id=req.id) }}" method="post">
-                            <button class="btn btn-success" type="submit">Approve</button>
-                        </form>
-                        <form action="{{ url_for('reject_request', req_id=req.id, role='hod') }}" method="post">
-                            <button class="btn btn-danger" type="submit">Reject</button>
-                        </form>
-                    {% elif current_user.role == 'principal' and req.hod_status == 'Approved' and req.principal_status == 'Pending' %}
-                        <form action="{{ url_for('approve_request', req_id=req.id) }}" method="post">
-                            <button class="btn btn-success" type="submit">Approve</button>
-                        </form>
-                        <form action="{{ url_for('reject_request', req_id=req.id, role='principal') }}" method="post">
-                            <button class="btn btn-danger" type="submit">Reject</button>
-                        </form>
+    .sidebar .cta {margin-top:auto}
+    .btn-primary {
+      display:inline-block;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));
+      color:white;font-weight:700;text-decoration:none;border:none;cursor:pointer;box-shadow:0 8px 18px rgba(11,27,43,0.12)
+    }
+
+    /* MAIN */
+    .main{flex:1;display:flex;flex-direction:column;gap:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .search input{width:480px;max-width:48vw;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--text)}
+    .profile{display:flex;align-items:center;gap:12px}
+
+    /* KPI grid */
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .kpi{
+      border-radius:12px;padding:18px;background:linear-gradient(180deg,var(--panel), color-mix(in srgb,var(--panel) 96%, transparent));
+      box-shadow:var(--card-shadow);border:1px solid var(--border);
+    }
+    .kpi .label{color:var(--muted);font-weight:700;font-size:0.9rem}
+    .kpi .value{font-weight:900;font-size:1.7rem;margin-top:8px}
+
+    /* Panel & Table */
+    .panel{border-radius:12px;padding:14px;background:linear-gradient(180deg,var(--panel), color-mix(in srgb,var(--panel) 96%, transparent));box-shadow:var(--card-shadow);border:1px solid var(--border)}
+    table{width:100%;border-collapse:collapse;font-size:0.95rem}
+    thead th{color:var(--muted);text-align:left;padding:12px 8px;border-bottom:1px solid var(--border)}
+    tbody td{padding:12px 8px;border-bottom:1px dashed var(--border);vertical-align:middle}
+    .status-chip{padding:6px 10px;border-radius:999px;font-weight:700;font-size:0.85rem}
+    .status-approved{background:linear-gradient(90deg,#dff8ef,#bff3de);color:var(--success)}
+    .status-pending{background:linear-gradient(90deg,#fff7e6,#fff1cc);color:var(--warn)}
+    .status-rejected{background:linear-gradient(90deg,#ffecec,#ffd6d6);color:var(--danger)}
+    .btn-ghost{background:transparent;border:1px solid var(--border);padding:6px 10px;border-radius:8px;color:var(--text);text-decoration:none}
+
+    /* top-right buttons (New Request + Logout) */
+    .top-actions { display:flex; gap:10px; align-items:center; }
+    .btn-success { background:#28a745; color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:700; }
+    .btn-danger  { background:#dc3545; color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:700; }
+    .btn-success:hover { background:#218838; }
+    .btn-danger:hover  { background:#c82333; }
+
+    /* responsive */
+    @media (max-width:1000px){
+      .app{flex-direction:column;padding:12px}
+      .sidebar{width:100%;flex-direction:row;overflow:auto;padding:12px}
+      .kpis{grid-template-columns:repeat(1,1fr)}
+      .search input{width:80%}
+    }
+  </style>
+</head>
+
+<body>
+  <div id="appRoot" class="app" data-theme="light">
+
+    <!-- SIDEBAR (minimal: only Dashboard) -->
+    <aside class="sidebar" role="navigation" aria-label="Sidebar">
+      <div class="brand">
+        <div class="logo">EA</div>
+        <div>
+          <h3>eApproval</h3>
+          <div class="muted" style="font-size:0.85rem">Smart approvals</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Main">
+        <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
+      </nav>
+
+      <!-- keep the sidebar compact: previously CTA was here but removed as requested -->
+      <div style="height:1px"></div>
+      <div class="muted" style="font-size:0.85rem">Quick summary</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="muted">Pending</div>
+          <div style="font-weight:800;font-size:1.4rem">{{ (kpis.pending_final if kpis is defined else (stats.pending if stats is defined else (summary.pending if summary is defined else 0))) }}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="muted">Approved</div>
+          <div style="font-weight:800;font-size:1.4rem">{{ (kpis.approved_final if kpis is defined else (stats.approved if stats is defined else (summary.approved if summary is defined else 0))) }}</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- TOPBAR with New Request and Logout on top-right -->
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:14px">
+          <h2 style="margin:0;font-weight:800">Dashboard</h2>
+          <div class="search">
+            <input id="searchBox" placeholder="Search requests, user, or ID..." />
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <!-- New Request visible to everyone (you can role-check if needed) -->
+          <a href="{{ url_for('new_request') }}" class="btn-success">+ New Request</a>
+
+          <!-- Logout -->
+          <a href="{{ url_for('logout') }}" class="btn-danger">Logout</a>
+
+          <!-- Theme toggle small -->
+          <button id="themeBtn" class="btn-ghost" title="Toggle theme">Theme</button>
+        </div>
+      </div>
+
+      <!-- KPI GRID -->
+      <div class="kpis" aria-hidden="false">
+        <div class="kpi">
+          <div class="label">Total Requests</div>
+          <div class="value">{{ (kpis.total_requests if kpis is defined else (stats.total if stats is defined else 0)) }}</div>
+          <div class="muted" style="margin-top:8px;font-size:0.9rem">Total requests in your scope</div>
+        </div>
+
+        <div class="kpi">
+          <div class="label">Pending Final</div>
+          <div class="value">{{ (kpis.pending_final if kpis is defined else (stats.pending if stats is defined else 0)) }}</div>
+          <div class="muted" style="margin-top:8px;font-size:0.9rem">Awaiting Principal approval</div>
+        </div>
+
+        <div class="kpi">
+          <div class="label">Approved Final</div>
+          <div class="value">{{ (kpis.approved_final if kpis is defined else (stats.approved if stats is defined else 0)) }}</div>
+          <div class="muted" style="margin-top:8px;font-size:0.9rem">Successfully approved</div>
+        </div>
+      </div>
+
+      <!-- RECENT REQUESTS PANEL -->
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-weight:800">Recent Requests</div>
+          <div class="muted">Showing latest</div>
+        </div>
+
+        <div style="overflow:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Title</th><th>User</th><th>CT</th><th>HOD</th><th>Principal</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% set rows = (recent_requests if recent_requests is defined else (requests if requests is defined else [])) %}
+              {% for r in rows %}
+                <tr>
+                  <td class="muted">#{{ r.id }}</td>
+                  <td>{{ r.title }}</td>
+                  <td class="muted">{{ (r.requester if r.requester is defined else (r.creator.username if r.creator is defined else '')) }}</td>
+
+                  <td>
+                    {% set ct = (r.class_teacher_status if r.class_teacher_status is defined else 'Pending') %}
+                    {% if 'Approved' in ct %}<span class="status-chip status-approved">{{ ct }}</span>
+                    {% elif 'Rejected' in ct %}<span class="status-chip status-rejected">{{ ct }}</span>
+                    {% else %}<span class="status-chip status-pending">{{ ct }}</span>{% endif %}
+                  </td>
+
+                  <td>
+                    {% set hods = (r.hod_status if r.hod_status is defined else 'Pending') %}
+                    {% if 'Approved' in hods %}<span class="status-chip status-approved">{{ hods }}</span>
+                    {% elif 'Rejected' in hods %}<span class="status-chip status-rejected">{{ hods }}</span>
+                    {% else %}<span class="status-chip status-pending">{{ hods }}</span>{% endif %}
+                  </td>
+
+                  <td>
+                    {% set ps = (r.principal_status if r.principal_status is defined else 'Pending') %}
+                    {% if 'Approved' in ps %}<span class="status-chip status-approved">{{ ps }}</span>
+                    {% elif 'Rejected' in ps %}<span class="status-chip status-rejected">{{ ps }}</span>
+                    {% else %}<span class="status-chip status-pending">{{ ps }}</span>{% endif %}
+                  </td>
+
+                  <td>
+                    <a href="{{ url_for('view_request', req_id=r.id) }}" class="btn-ghost" style="text-decoration:none">Open</a>
+                    {% if r.principal_status is defined and r.principal_status == 'Approved' %}
+                      <a href="{{ url_for('generate_pdf', req_id=r.id) }}" class="btn-ghost" style="text-decoration:none;margin-left:8px">PDF</a>
                     {% endif %}
+                  </td>
+                </tr>
+              {% else %}
+                <tr><td colspan="7" class="muted">No recent requests</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                    <!-- PDF download -->
-                    {% if req.principal_status == 'Approved' %}
-                        <a class="btn btn-pdf" href="{{ url_for('generate_pdf', req_id=req.id) }}">📄 PDF</a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 20px;">No requests found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% endblock %}
+      <div style="text-align:center" class="muted">© {{ current_year | default(2025) }} eApproval</div>
+    </main>
+  </div>
+
+  <script>
+    (function(){
+      const root = document.getElementById('appRoot');
+      const themeBtn = document.getElementById('themeBtn');
+
+      function getTheme(){ const s = localStorage.getItem('theme'); if(s) return s; return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+      function applyTheme(t){ root.setAttribute('data-theme', t); localStorage.setItem('theme', t); }
+      applyTheme(getTheme());
+
+      themeBtn.addEventListener('click', ()=> applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+      // client-side search
+      document.getElementById('searchBox').addEventListener('input', function(e){
+        const q = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('table tbody tr').forEach(row=>{
+          const text = row.textContent.toLowerCase();
+          row.style.display = q ? (text.includes(q) ? '' : 'none') : '';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
